@@ -76,7 +76,17 @@ def add_song():
     search_btn = CTkButton(master=add_song_win, text='검색', command=search_song)
     search_btn.pack()
 
+def add_playlist():
+    add_playlist_win = CTkToplevel(root)
+    
+
 add_song_btn = CTkButton(master=root, text='노래 추가', command=add_song)
 add_song_btn.pack()
+
+add_playlist_label = CTkLabel(master=root, text='\n')
+add_playlist_label.pack()
+
+add_playlist_btn = CTkButton(master=root, text='재생목록 추가', command=add_playlist)
+add_playlist_btn.pack()
 
 root.mainloop()
