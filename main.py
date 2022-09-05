@@ -1,12 +1,14 @@
 from re import search
 from youtubesearchpython import VideosSearch
-from audioplayer import AudioPlayer
+# from audioplayer import AudioPlayer
+from playsound import playsound 
 from tkinter import *
 import youtube_dl
 import os
 from customtkinter import *
-import time
 
+# 개인 설정 저장된걸로 불러오기 (setting/appearance_mode.txt, default_color_theme.txt)
+# 홈 메뉴에서 설정 가능
 set_appearance_mode("dark")  # Modes: system (default), light, dark
 set_default_color_theme("dark-blue")  # Themes: blue (default), dark-blue, green
 
@@ -78,7 +80,75 @@ def add_song():
 
 def add_playlist():
     add_playlist_win = CTkToplevel(root)
+
+    whatis_name = CTkLabel(master=add_playlist_win, text='재생목록의 이름을 작성해주세요.')
+    whatis_name.pack()
+
+    get_name = CTkEntry(master=add_playlist_win)
+    get_name.pack()
+
+    def make_playlist():
+        playlist_name = get_name.get()
+        open(f'./playlist/{playlist_name}.txt' , 'w').close()
+        add_playlist_win.destory()
+        
+    make_btn = CTkButton(master=add_playlist_win, text='만들기', command=make_playlist)
+    make_btn.pack()
     
+def ready_delete_playlist():
+    delete_pl_win = CTkToplevel(root)
+
+    pl_label = CTkLabel(master=delete_pl_win, text='삭제할 재생목록을 선택해주세요.')
+    pl_label.pack()
+
+    os_playlist = os.listdir('./playlist/')
+    playlist_list = [] # 플레이리스트 이름만 있는 리스트  ex) ['playlist1', 'playlist2']
+        
+    for i in os_playlist:
+        playlist_list.append(i.replace(".txt", ""))
+
+    playlist = CTkComboBox(master=delete_pl_win, values=playlist_list, command=None)
+    playlist.pack()
+
+    def delete_playlist():
+        the_pl_name = playlist.get()
+        os.remove(f'./playlist/{the_pl_name}.txt')
+        delete_pl_win.destroy()
+
+    accept_to_delete_btn = CTkButton(master=delete_pl_win, text='제거하기', command=delete_playlist)
+    accept_to_delete_btn.pack()
+
+def ready_play_song():
+    play_song_win = CTkToplevel(root)
+
+    pl_label = CTkLabel(master=play_song_win, text='재생할 재생목록을 선택해주세요.')
+    pl_label.pack()
+
+    os_playlist = os.listdir('./playlist/')
+    playlist_list = [] # 플레이리스트 이름만 있는 리스트  ex) ['playlist1', 'playlist2']
+        
+    for i in os_playlist:
+        playlist_list.append(i.replace(".txt", ""))
+
+    playlist = CTkComboBox(master=play_song_win, values=playlist_list, command=None)
+    playlist.pack()
+
+    def play_song():
+        the_playlist = playlist.get()
+        with open(f'./playlist/{the_playlist}.txt', 'r', encoding='utf-8') as f:
+            songs = f.readlines()
+        
+        play_song_win.destroy()
+        song_setting = CTkToplevel(root)
+        
+        for i in songs:
+            if "\n" in i:
+                i = i.replace("\n", "")
+            # AudioPlayer(f"./music/{i}.mp3").play(block=True) 
+            playsound(f'./music/{i}.mp3') 
+
+    play_btn = CTkButton(master=play_song_win, text='재생 시작', command=play_song)
+    play_btn.pack()
 
 add_song_btn = CTkButton(master=root, text='노래 추가', command=add_song)
 add_song_btn.pack()
@@ -88,5 +158,11 @@ add_playlist_label.pack()
 
 add_playlist_btn = CTkButton(master=root, text='재생목록 추가', command=add_playlist)
 add_playlist_btn.pack()
+
+delete_playlist_btn = CTkButton(master=root, text='재생목록 삭제', command=ready_delete_playlist)
+delete_playlist_btn.pack()
+
+play_song_btn = CTkButton(master=root, text='노래 재생', command=ready_play_song)
+play_song_btn.pack()
 
 root.mainloop()
